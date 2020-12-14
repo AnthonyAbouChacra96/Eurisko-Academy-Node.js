@@ -4,9 +4,10 @@ const path = require("path");
 
 const router = express.Router();
 
-const productsControler=require('../Controllers/products');
+const adminControler=require('../Controllers/admin');
 
-router.get("/add-product",productsControler.getAddProduct);
-router.post("/add-product",productsControler.postAddProduct );
-
+router.get("/add-product",adminControler.getAddProduct);
+router.get("/products",adminControler.getProducts);
+router.post("/add-product",adminControler.postAddProduct );
+ 
 exports.routes = router;
