@@ -6,6 +6,7 @@ const shopRoutes = require('./routes/shop');
 const rootDir = require("./Util/path"); 
 const errorControler=require('./Controllers/error')
 // const expressHbs=require('express-handlebars')
+const db=require('./Util/database');
 const app=express();
 
 // app.engine('hbs',expressHbs({
@@ -24,6 +25,11 @@ app.use(express.static(path.join(rootDir,"public")));
 app.use('/admin',adminRoutes.routes);
 app.use(shopRoutes);
 
+db.execute("select * from products")
+.then(result=>{
+	console.log(result[0],result[1]);
+})
+.catch(err=>{console.log(err);});
 
 app.use(errorControler.get404);
 
