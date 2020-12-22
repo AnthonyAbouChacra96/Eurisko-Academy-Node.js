@@ -9,6 +9,10 @@ const errorControler=require('./Controllers/error')
  const sequelize=require('./Util/database');
  const Product = require('./Models/product');
  const User = require('./Models/user');
+ const Cart = require('./Models/cart');
+ const CartItem = require('./Models/cart-item');
+ const Order = require('./Models/order');
+ const OrderItem = require('./Models/order-item');
 
 
 
@@ -47,6 +51,13 @@ app.use(shopRoutes);
 app.use(errorControler.get404);
 Product.belongsTo(User),{constraints:true,onDelete:'CASCADE'};
 User.hasMany(Product);
+User.hasOne(Cart);
+Cart.belongsTo(User);
+Cart.belongsToMany(Product,{through:CartItem});
+Product.belongsToMany(Cart, { through: CartItem });
+Order.belongsTo(User);
+User.hasMany(Order);
+Order.belongsToMany(Product,{through:OrderItem})
 //sequelize.sync({force:true})
 sequelize.sync()
 .then(result=>{
@@ -60,6 +71,10 @@ sequelize.sync()
 })
 .then(user=>{
 	console.log(user);
+return	user.createCart();
+
+})
+.then(cart=>{
 		app.listen(3000);
 })
 .catch(err=>{
