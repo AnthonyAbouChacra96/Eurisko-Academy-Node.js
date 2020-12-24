@@ -1,22 +1,22 @@
 const express= require('express');
 const path = require("path");
 const bodyParser=require('body-parser');
-const rootDir = require("./Util/path"); 
+const mongoose=require('mongoose');
 const errorControler=require('./Controllers/error')
 // const expressHbs=require('express-handlebars')
 //  const sequelize=require('./Util/database');
 //  const Product = require('./Models/product');
-//  const User = require('./Models/user');
+ const User = require('./Models/user');
 //  const Cart = require('./Models/cart');
 //  const CartItem = require('./Models/cart-item');
 //  const Order = require('./Models/order');
 //  const OrderItem = require('./Models/order-item');
 
-const mongoConnect=require('./Util/database').mongoConnect;
- const User = require('./Models/user');
+//const mongoConnect=require('./Util/database').mongoConnect;
+//  const User = require('./Models/user');
 
 const app=express();
-
+ 
 // app.engine('hbs',expressHbs({
 	// 	layoutsDir:'Views/layouts/',
 	// 	defaultLayout:'main-layout',
@@ -29,14 +29,15 @@ const app=express();
 	
 	const adminRoutes = require('./routes/admin');
 	 const shopRoutes = require('./routes/shop');
+const user = require('./Models/user');
 	
 	app.use(bodyParser.urlencoded({extended:false}));
 app.use(express.static(path.join(__dirname,"public")));
 
 app.use((req,res,next)=>{
-	User.findById("5fe2899c611ee6340dd05302")
+	User.findById("5fe47dd67b55a1376ca2d8c4")
     .then((user) => {
-      req.user = new User(user.name,user.email,user.cart,user._id) ;
+      req.user = user;
       next();
     })
     .catch((err) => {
@@ -86,7 +87,28 @@ app.use(errorControler.get404);
 // 	console.log(err);
 // });
 
-mongoConnect(()=>{
-	app.listen(3000);
-});
+// mongoConnect(()=>{
+// 	app.listen(3000);
+// });
+mongoose.connect(
+  "mongodb+srv://Anthony_Node:ArA538SJb8wV8PAx@cluster0.zb7cb.mongodb.net/shop?retryWrites=true&w=majority"
+)
+.then(result=>{
+	User.findOne().then(user=>{
+		if(!user){
 
+			const user =new User({
+				name:"Anthony",
+				email:"Anthony@test.com",
+				cart:{
+					items:[]
+				}
+				});
+				user.save();
+		}
+	})
+	app.listen(3000);
+})
+.catch(err=>{
+	console.log(err);
+});
