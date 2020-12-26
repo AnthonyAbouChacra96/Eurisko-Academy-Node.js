@@ -1,13 +1,15 @@
 const mongoose = require("mongoose");
 const userSchema = mongoose.Schema({
-	email: {
-		type: String,
+  email: {
+    type: String,
     required: true,
   },
-	password: {
-		type: String,
-		required: true,
-	},
+  password: {
+    type: String,
+    required: true,
+  },
+  resetToken: String,
+  resetTokenExpiration:Date,
   cart: {
     items: [
       {
@@ -17,7 +19,7 @@ const userSchema = mongoose.Schema({
           ref: "Product",
         },
         quantity: { type: Number, required: true },
-      },
+      },	
     ],
   },
 });
@@ -38,21 +40,21 @@ userSchema.methods.addToCart = function (product) {
   }
   const updatedCart = {
     items: updateCartItems,
-	};
-	this.cart=updatedCart;
-	return this.save();
+  };
+  this.cart = updatedCart;
+  return this.save();
 };
-userSchema.methods.removeFromCart=function(productId) {
-	const updatedCartItems = this.cart.items.filter(
-      (item) => item.productId.toString() !== productId.toString()
-		);
-		this.cart.items=updatedCartItems;
-		return this.save();
-}
-userSchema.methods.clearCart=function(){
-	this.cart={items:[]};
-	return this.save();
-}
+userSchema.methods.removeFromCart = function (productId) {
+  const updatedCartItems = this.cart.items.filter(
+    (item) => item.productId.toString() !== productId.toString()
+  );
+  this.cart.items = updatedCartItems;
+  return this.save();
+};
+userSchema.methods.clearCart = function () {
+  this.cart = { items: [] };
+  return this.save();
+};
 module.exports = mongoose.model("User", userSchema);
 // const mongodb = require("mongodb");
 // const getDb = require("../Util/database").getDb;
