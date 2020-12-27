@@ -3,7 +3,6 @@ const nodemailer = require("nodemailer");
 const sendgridTransport = require("nodemailer-sendgrid-transport");
 const User = require("../Models/user");
 const bcrypt = require("bcryptjs");
-const { postCartDeleteProduct } = require("./shop");
 
 const transporter = nodemailer.createTransport(
   sendgridTransport({
@@ -135,7 +134,7 @@ exports.postReset = (req, res, next) => {
           return res.redirect("/reset");
         }
         user.resetToken = token;
-        user.resetExpiration = Date.now() + 3600000;
+        user.resetTokenExpiration = Date.now() + 3600000;
         return user.save();
       })
       .then((result) => {
@@ -155,7 +154,7 @@ exports.postReset = (req, res, next) => {
 };
 exports.getNewPassword = (req, res, next) => {
 	const token=req.params.token;
-	User.findOne({ resetToken: token, resetExpiration: { $gt: Date.now() } })
+	User.findOne({ resetToken: token, resetTokenExpiration: { $gt: Date.now() } })
     .then(user=>{
 			let message = req.flash("error");
 			if (message.length > 0) {
@@ -165,8 +164,35 @@ exports.getNewPassword = (req, res, next) => {
 				path: "/new-password",
 				pageTitle: "New Password",
 				errorMessage: message,
-				userId:user._id.toString()
+				userId:user._id.toString(),
+				passwordToken:token
 			});
 		})
     .catch((err) => console.log(err));
 };
+exports.postNewPassword=(req,res,next)=>{
+	const newPassword=req.body.password;
+	const userId=req.body.userId;
+	const passwordToken=req.body.passwordToken;
+	let resetUser;
+	User.findOne({
+    resetToken: passwordToken,
+    resetTokenExpiration: { $gt: Date.now() },
+    _id: userId,
+  })
+    .then(user=>{
+			resetUser=user;
+			return bcrypt.hash(newPassword,12)
+		})
+		.then(hashedPassword=>{
+			resetUser.password=hashedPassword;
+			resetUser.resetToken=null;
+			resetUser.resetTokenExpiration=undefined;
+			return resetUser.save();
+		})
+		.then(result=>{
+			res.redirect('/login');
+		})
+    .catch((err) => console.log(err));
+
+}
