@@ -1,5 +1,5 @@
-const Product = require('../models/product');
-const Order = require('../models/order');
+const Product = require("../models/product");
+const Order = require("../models/order");
 
 exports.getProducts = (req, res, next) => {
   Product.find()
@@ -73,12 +73,17 @@ exports.getCart = (req, res, next) => {
 exports.postCart = (req, res, next) => {
   const prodId = req.body.productId;
   Product.findById(prodId)
-    .then(product => {
+    .then((product) => {
       return req.user.addToCart(product);
     })
-    .then(result => {
+    .then((result) => {
       console.log(result);
-      res.redirect('/cart');
+      res.redirect("/cart");
+    })
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
     });
 };
 
