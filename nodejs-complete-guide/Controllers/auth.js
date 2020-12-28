@@ -90,23 +90,27 @@ exports.postLogin = (req, res, next) => {
               return res.redirect("/");
             });
           }
-        return res.status(422).render("auth/login", {
-          path: "/login",
-          pageTitle: "Login",
-          errorMessage: "Invalid email or password.",
-          oldInput: {
-            email: email,
-            password: password,
-          },
-          validationErrors: [],
-        });
+          return res.status(422).render("auth/login", {
+            path: "/login",
+            pageTitle: "Login",
+            errorMessage: "Invalid email or password.",
+            oldInput: {
+              email: email,
+              password: password,
+            },
+            validationErrors: [],
+          });
         })
         .catch((err) => {
           console.log(err, "errrr");
           res.redirect("/login");
         });
     })
-    .catch((err) => console.log(err, "eroroeoeor"));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
 };
 
 exports.postSignup = (req, res, next) => {
@@ -146,7 +150,11 @@ exports.postSignup = (req, res, next) => {
       //   html: "<h1>you successfully signed up!</h1>",
       // });
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
 };
 
 exports.postLogout = (req, res, next) => {
@@ -194,7 +202,11 @@ exports.postReset = (req, res, next) => {
 					`,
         });
       })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        const error = new Error(err);
+        error.httpStatusCode = 500;
+        return next(error);
+      });
   });
 };
 exports.getNewPassword = (req, res, next) => {
@@ -213,7 +225,11 @@ exports.getNewPassword = (req, res, next) => {
         passwordToken: token,
       });
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
 };
 exports.postNewPassword = (req, res, next) => {
   const newPassword = req.body.password;
@@ -238,5 +254,9 @@ exports.postNewPassword = (req, res, next) => {
     .then((result) => {
       res.redirect("/login");
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
 };
